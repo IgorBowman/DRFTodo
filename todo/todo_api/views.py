@@ -1,3 +1,4 @@
+from django.db.migrations import serializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -27,3 +28,23 @@ class TodoListApiView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TodoDetailApiView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self, todo_id, user_id):
+        try:
+            return Todo.objects.get(id=todo_id, user=user_id)
+        except Todo.DoesnotExist:
+            return None
+
+    def get(self, request, todo_id, *args, **kwargs):
+        todo_instance = self.get_object(todo_id, request.user.id)
+        if not todo_instance:
+            return Response(
+                {"res": "Object with todo does not exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        serializer = TodoSerializer(todo_instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
