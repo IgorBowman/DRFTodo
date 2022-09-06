@@ -68,3 +68,16 @@ class TodoDetailApiView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, todo_id, *args, **kwargs):
+        todo_instance = self.get_object(todo_id, request.user.id)
+        if not todo_instance:
+            return Response(
+                {"res": "Object with todo does not exists"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        todo_instance.delete()
+        return Response(
+            {"res": "Object deleted"},
+            status=status.HTTP_200_OK
+        )
