@@ -34,5 +34,16 @@ class TestTodoApiTestCase(APITestCase):
         response = self.client.post(reverse('get_all_todo'), data, format='json')
         self.assertEqual(status.HTTP_201_CREATED, response.status_code)
         self.assertEqual(response.data['task'], data['task'])
-        response = self.client.get(reverse('get_all_todo'))
-        self.assertEqual(len(response.data), 4)
+        self.assertEqual(4, Todo.objects.all().count())
+
+    def test_get_one_todo(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.get(reverse('get_single_todo', kwargs={'todo_id': self.todo_1.pk}))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+
+    def test_delete_todo(self):
+        self.client.force_authenticate(user=self.user)
+        response = self.client.delete(reverse('get_single_todo', kwargs={'todo_id': self.todo_1.pk}))
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(2, Todo.objects.all().count())
+
